@@ -80,9 +80,54 @@
  * minimal as most of the setup is managed by the settings in the project
  * file.
  */
+
+TaskHandle_t LedTask_Handler = NULL;
+
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
+/* Task to be created. */
+void Led_Task1(void * pvParameters)
+{
+	for( ; ; )
+	{
+		GPIO_write(PORT_0,PIN1, PIN_IS_HIGH);
+		
+		vTaskDelay(100);
+		
+		GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
+		
+		vTaskDelay(100);
+	}
+}
+
+void Led_Task2(void * pvParameters)
+{
+	for( ; ; )
+	{
+		GPIO_write(PORT_0,PIN2, PIN_IS_HIGH);
+		
+		vTaskDelay(500);
+		
+		GPIO_write(PORT_0,PIN2, PIN_IS_LOW);
+		
+		vTaskDelay(500);
+	}
+}
+
+void Led_Task3(void * pvParameters)
+{
+	for( ; ; )
+	{
+		GPIO_write(PORT_0,PIN3, PIN_IS_HIGH);
+		
+		vTaskDelay(1000);
+		
+		GPIO_write(PORT_0,PIN3, PIN_IS_LOW);
+		
+		vTaskDelay(1000);
+	}
+}
 
 /*
  * Application entry point:
@@ -95,8 +140,30 @@ int main( void )
 
 	
     /* Create Tasks here */
+		xTaskCreate(
+			Led_Task1,
+			"Led_Task1",
+			configMINIMAL_STACK_SIZE,
+			(void * ) NULL,
+			1,
+			&LedTask_Handler);
 
-
+			xTaskCreate(
+			Led_Task2,
+			"Led_Task2",
+			configMINIMAL_STACK_SIZE,
+			(void * ) NULL,
+			1,
+			&LedTask_Handler);
+			
+			xTaskCreate(
+			Led_Task3,
+			"Led_Task3",
+			configMINIMAL_STACK_SIZE,
+			(void * ) NULL,
+			1,
+			&LedTask_Handler);
+			
 	/* Now all the tasks have been started - start the scheduler.
 
 	NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.

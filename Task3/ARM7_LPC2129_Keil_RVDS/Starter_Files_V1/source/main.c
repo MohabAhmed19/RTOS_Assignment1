@@ -80,9 +80,67 @@
  * minimal as most of the setup is managed by the settings in the project
  * file.
  */
+
+TaskHandle_t LedTask_Handler = NULL;
+
+static int Pressed_Time=0;
+
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
+/* Task to be created. */
+
+void PB_Task(void * pvParameters)
+{
+	for( ; ; )
+	{
+		if(GPIO_read(PORT_0, PIN0)==PIN_IS_HIGH)
+	{
+		int stop;
+		int start = xTaskGetTickCount();
+		while(GPIO_read(PORT_0, PIN0)==PIN_IS_HIGH);
+		stop = xTaskGetTickCount();
+		Pressed_Time = (stop - start);
+	}
+	taskYIELD();
+		
+	}
+	
+}
+
+void Led_Task(void * pvParameters)
+{
+	for( ; ; )
+	{
+	if(Pressed_Time <=2000)
+		{
+			GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
+		}
+	else if(Pressed_Time <=4000)
+		{
+			GPIO_write(PORT_0,PIN1, PIN_IS_HIGH);
+			
+			vTaskDelay(400);
+			
+			GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
+			
+			vTaskDelay(400);
+		}
+		
+		else if(Pressed_Time >4000)
+		{
+			GPIO_write(PORT_0,PIN1, PIN_IS_HIGH);
+			
+			vTaskDelay(100);
+			
+			GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
+			
+			vTaskDelay(100);
+		}
+		taskYIELD();
+	}
+	
+}
 
 /*
  * Application entry point:
@@ -95,7 +153,21 @@ int main( void )
 
 	
     /* Create Tasks here */
-
+		xTaskCreate(
+			PB_Task,
+			"PB_Task",
+			configMINIMAL_STACK_SIZE,
+			(void * ) NULL,
+			1,
+			NULL);
+	
+		xTaskCreate(
+			Led_Task,
+			"Led_Task",
+			configMINIMAL_STACK_SIZE,
+			(void * ) NULL,
+			1,
+			&LedTask_Handler);
 
 	/* Now all the tasks have been started - start the scheduler.
 

@@ -80,9 +80,26 @@
  * minimal as most of the setup is managed by the settings in the project
  * file.
  */
+
+TaskHandle_t LedTask_Handler = NULL;
+
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
+/* Task to be created. */
+void Led_Task(void * pvParameters)
+{
+	for( ; ; )
+	{
+		GPIO_write(PORT_0,PIN1, PIN_IS_HIGH);
+		
+		vTaskDelay(1000);
+		
+		GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
+		
+		vTaskDelay(1000);
+	}
+}
 
 /*
  * Application entry point:
@@ -95,7 +112,13 @@ int main( void )
 
 	
     /* Create Tasks here */
-
+		xTaskCreate(
+			Led_Task,
+			"Led_Task",
+			configMINIMAL_STACK_SIZE,
+			(void * ) NULL,
+			1,
+	&LedTask_Handler);
 
 	/* Now all the tasks have been started - start the scheduler.
 
